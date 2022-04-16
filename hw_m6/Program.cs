@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.IO;
+
 
 namespace hw_m6
 {
@@ -12,11 +9,16 @@ namespace hw_m6
 
         static string EmployeeInfo()
         {
+
             string[] employeeArray = new string[7];
-            Console.WriteLine("\nInput ID");
+
+            //Текущее время
+            employeeArray[1] = Convert.ToString(DateTime.Now);
+
+            //Пользовательский ввод данных сотрудника
+            Console.WriteLine("Input ID");
             employeeArray[0] = Console.ReadLine();
-            Console.WriteLine("Input date and time");
-            employeeArray[1] = Console.ReadLine();
+
             Console.WriteLine("Input full name");
             employeeArray[2] = Console.ReadLine();
             Console.WriteLine("Input age");
@@ -28,47 +30,41 @@ namespace hw_m6
             Console.WriteLine("Place of birth");
             employeeArray[6] = Console.ReadLine();
 
+            //Конвертация в строку для возврата значения
             string employee = null;
-
             for (int i = 0; i <= 6; i++)
             {
                 employee += employeeArray[i];
                 employee += "#";
             }
-            employee += "\n\n";
             return employee;
         }
 
+        //Запись данных в файл
         static void InputInfo(string path)
         {
-
-            string employee = EmployeeInfo();
-
             if (File.Exists(path))
             {
-            File.AppendAllText(path, employee);
-            }
-            else if (!File.Exists(path))
-            {
-            File.WriteAllText(path, employee);
-            }
-
-
-        }
-
-        static string OutputInfo(string path)
-        {
-
-            if (File.Exists(path))
-            {
-                return File.ReadAllText(path);
+                File.AppendAllLines(path, EmployeeInfo().Split());
             }
             else
             {
-                return "\nOops, you have not created this file yet\n";
+                using (StreamWriter sw = new StreamWriter(path))
+                {
+                    sw.WriteLine(EmployeeInfo());
+                }
             }
-
         }
+
+        //Чтение данных из файла
+        static string OutputInfo(string path)
+        {
+            using (StreamReader sr = new StreamReader(path))
+            {
+                return sr.ReadToEnd();
+            }
+        }
+
 
         static void Main(string[] args)
         {
@@ -77,7 +73,7 @@ namespace hw_m6
 
             while (true)
             {
-
+                //Управление программой
                 Console.Write("Menu \n1 - for get info" +
                     "               \n2 - for input info" +
                     "               \n3 - for stop program" +
@@ -87,10 +83,8 @@ namespace hw_m6
 
                 if (choise == 1)
                 {
-                    string getInfo = OutputInfo(path);
-                    string[] splitInfo = getInfo.Split('#');
-
-                    foreach(string str in splitInfo)
+                    string[] OI = OutputInfo(path).Split('#');
+                    foreach (string str in OI)
                     {
                         Console.WriteLine(str);
                     }
@@ -109,7 +103,7 @@ namespace hw_m6
                     File.Delete(path);
                 }
                 else { Console.WriteLine("Unknown command"); }
-                
+
             }
         }
     }
