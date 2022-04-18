@@ -6,71 +6,89 @@ namespace hw_m6
 {
     internal class Program
     {
-
-        static string EmployeeInfo()
+        //Ввод данных для записи в файл
+        static string InputEmployee(string[] constEmployee, int id)
         {
-
-            string[] employeeArray = new string[7];
-
-            //Текущее время
-            employeeArray[1] = Convert.ToString(DateTime.Now);
-
-            //Пользовательский ввод данных сотрудника
-            Console.WriteLine("Input ID");
-            employeeArray[0] = Console.ReadLine();
-
-            Console.WriteLine("Input full name");
-            employeeArray[2] = Console.ReadLine();
-            Console.WriteLine("Input age");
-            employeeArray[3] = Console.ReadLine();
-            Console.WriteLine("Input growth");
-            employeeArray[4] = Console.ReadLine();
-            Console.WriteLine("Input day of birth");
-            employeeArray[5] = Console.ReadLine();
-            Console.WriteLine("Place of birth");
-            employeeArray[6] = Console.ReadLine();
-
-            //Конвертация в строку для возврата значения
-            string employee = null;
-            for (int i = 0; i <= 6; i++)
+            //Инициализация переменных
+            string employeeInfo = null;
+            string [] tempArray = new string[constEmployee.Length];
+            //Автоматический + ручной ввод данных
+            tempArray[0] = $"{id}";
+            tempArray[1] = Convert.ToString(DateTime.Now);
+            for (int i = 2; i < tempArray.Length; i++)
             {
-                employee += employeeArray[i];
-                employee += "#";
+                Console.Write(constEmployee[i]);
+                tempArray[i] = Console.ReadLine();
+                employeeInfo = String.Join("#", tempArray);
             }
-            return employee;
+            employeeInfo += "\n";
+            //Возврат строки
+            return employeeInfo;
         }
 
         //Запись данных в файл
-        static void InputInfo(string path)
+        static void InputInfo(string path, string employeeInfo)
         {
             if (File.Exists(path))
             {
-                File.AppendAllLines(path, EmployeeInfo().Split());
+                File.AppendAllText(path, employeeInfo);
             }
             else
             {
                 using (StreamWriter sw = new StreamWriter(path))
                 {
-                    sw.WriteLine(EmployeeInfo());
+                    sw.WriteLine(employeeInfo);
                 }
             }
         }
 
         //Чтение данных из файла
-        static string OutputInfo(string path)
+        static void OutputInfo(string path, string [] constEmployee)
         {
-            using (StreamReader sr = new StreamReader(path))
+            if (File.Exists(path))
             {
-                return sr.ReadToEnd();
+                //Инициализация переменной для хранения строки из файла
+                string line;
+                using (StreamReader sr = new StreamReader(path))
+                {
+                    //Присвоение данных строке до конца файла
+                    while ((line = sr.ReadLine()) != null)
+                    {
+                        //Разделение строки на массив данных для последующего вывода
+                        string[] lineArray = line.Split('#');
+                        for (int i = 0; i < lineArray.Length - 1; i++)
+                        {
+                            Console.Write(constEmployee[i]);
+                            Console.WriteLine(lineArray[i]);
+                        }
+                        Console.WriteLine();
+                    }
+                }
+            } 
+            else
+            {
+                //Отработка исключений для отсутствующего файла
+                Console.WriteLine("Sorry, file isn`t founded.");
             }
+            
         }
-
 
         static void Main(string[] args)
         {
-
+            //Счетчик id сотрудников
+            int idCount = 1;
+            //Константные значения для формы заполнения и вывода
+            string[] constEmployee = new string[7];
+            constEmployee[0] = "ID: ";
+            constEmployee[1] = "Date of creation: ";
+            constEmployee[2] = "Full Name: ";
+            constEmployee[3] = "Age: ";
+            constEmployee[4] = "Groth: ";
+            constEmployee[5] = "Day of birth: ";
+            constEmployee[6] = "Place of birth: ";
+            //Путь к файлу
             string path = @"E:\directory";
-
+            //Бесконечный цикл
             while (true)
             {
                 //Управление программой
@@ -81,24 +99,23 @@ namespace hw_m6
 
                 int choise = int.Parse(Console.ReadLine());
 
-                if (choise == 1)
+                if (choise == 1) //Получить информацию из файла
                 {
-                    string[] OI = OutputInfo(path).Split('#');
-                    foreach (string str in OI)
-                    {
-                        Console.WriteLine(str);
-                    }
+                    
+                    OutputInfo(path, constEmployee);
 
                 }
-                else if (choise == 2)
+                else if (choise == 2) //Ввести информацию в файл
                 {
-                    InputInfo(path);
+                    string employeeInfo = InputEmployee(constEmployee, idCount);
+                    InputInfo(path, employeeInfo);
+                    idCount++;
                 }
-                else if (choise == 3)
+                else if (choise == 3) //Выйти из цикла и остановить выполнение программы
                 {
                     break;
                 }
-                else if (choise == 0)
+                else if (choise == 0) //Удаление файла
                 {
                     File.Delete(path);
                 }
